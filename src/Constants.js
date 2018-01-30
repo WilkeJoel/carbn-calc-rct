@@ -1,0 +1,76 @@
+export const g_eFactorValue = 1;
+
+
+
+// Household Vehicles
+export const g_CO2_EMITTED_PER_GALLON_OF_GASOLINE = 19.6;
+export const g_NONCO2_EMITTED_PER_GALLON_OF_GASOLINE = 1.013684744044602;
+export const g_AVG_EMISSIONS_PER_VEHICLE = 10484;
+
+// HOME ENERGY
+//  -- NAT GAS
+export const g_AVG_NAT_GAS_PRICE_PER_THOUSAND_CUBIC_FEET = 10.68;
+export const g_AVG_NAT_GAS_PRICE_PER_THERM = 1.04;
+export const g_NAT_GAS_THERMS_EMISSIONS_FACTOR = 11.7;
+export const g_NAT_GAS_CUBIC_FEET_EMISSIONS_FACTOR = 119.58;
+export const g_NAT_GAS_AVG_EMISSIONS_PER_PERSON = 3071;    
+
+//  -- ELECTRICITY
+export const g_AVG_ELEC_PRICE_PER_KILOWATT = 0.1188;
+export const g_ELEC_AVG_EMISSIONS_PER_PERSON = 5455;
+export const g_ELEC_AVG_COST_PER_PERSON = 43.61;
+
+//  -- FUEL OIL
+export const g_AVG_FUEL_OIL_PRICE_PER_GALLON = 4.02;
+export const g_FUEL_OIL_EMISSIONS_FACTOR = 22.61;
+export const g_FUEL_OIL_AVG_EMISSIONS_PER_PERSON = 4848;    
+
+//  -- Propane
+export const g_AVG_PROPANE_PRICE_PER_GALLON = 2.47;
+export const g_PROPANE_EMISSIONS_FACTOR = 12.43;
+export const g_PROPANE_AVG_EMISSIONS_PER_PERSON = 2243;    
+
+
+// WASTE
+export const g_WASTE_AVG_PER_PERSON = 691.5;
+export const g_METAL_REDUCTION = -89.38;
+export const g_PLASTIC_REDUCTION = -35.56;
+export const g_GLASS_REDUCTION = -25.39;
+export const g_NEWSPAPER_REDUCTION = -113.14;
+export const g_MAGAZINE_REDUCTION = -27.46;
+export const g_TOTAL_EMISSIONS_AVG_PER_PERSON = 19702;
+
+
+// ON THE ROAD
+export const g_AVG_COST_PER_MILE = 0.1964;
+export const g_VEHICLE_EFFICIENCY_IMPROVEMENTS = 0.07;
+export const g_AVG_GAS_PRICE_PER_GALLON = 3.68;
+
+// AT HOME
+export const g_HEATING_SAVINGS_PER_DEGREE_OF_SETBACK = 0.03;
+export const g_PERCENT_NAT_GAS_TO_HEATING = 0.63;
+export const g_PERCENT_ELEC_TO_HEATING = 0.09;
+export const g_PERCENT_FUEL_OIL_TO_HEATING = 0.87;
+export const g_PERCENT_PROPANE_TO_HEATING = 0.70;
+export const g_PERCENT_ELEC_TO_COOLING = 0.14;
+export const g_COOLING_SAVINGS_PER_DEGREE_OF_SETBACK = 0.06;
+export const g_COMPUTER_SLEEP_SAVINGS = 107.1;
+export const g_KWH_PER_LOAD_LAUNDRY = 0.96;
+export const g_DRYER_SAVINGS = 769;
+export const g_LAMP_KWH_SAVINGS = 33;
+export const g_LAMP_DOLLAR_SAVINGS = 4;
+export const g_FRIDGE_REPLACE_KWH_SAVINGS = 322;
+export const g_BOILER_REPLACE_SAVINGS_NAT_GAS = 728;
+export const g_BOILER_REPLACE_SAVINGS_FUEL_OIL = 1056;
+export const g_BOILER_REPLACE_COST_SAVINGS = 78.34;
+export const g_SWITCH_WINDOWS_SAVINGS = 25210000;
+export const g_WINDOW_REPLACE_COST_SAVINGS = 150;
+
+
+// CONVERSION FACTORS/CONSTANTS
+export const g_BTU_PER_1000CF_NAT_GAS = 1023000;
+export const g_BTU_PER_KWH = 3412;
+export const g_BTU_PER_GALLON_FUEL_OIL =  138691.09;
+export const g_BTU_PER_GALLON_PROPANE =  91335.94;
+export const g_NUM_WEEKS_PER_YEAR = 52;
+export const g_NUM_MONTHS_PER_YEAR = 12;
