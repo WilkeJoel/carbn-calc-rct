@@ -6,11 +6,12 @@ import calcNaturalGas from './functions/calcNaturalGas.js';
 import calcFuelOil from './functions/calcFuelOil.js';
 import calcElectric from './functions/calcElectric.js';
 import calcPropane from './functions/calcPropane.js';
+import calcVehicleEmissions from './functions/calcVehicleEmissions.js';
 
 import Readout from './Readout.js';
-import SelectBox from './SelectBox.js';
-import InputNumberBox from './InputNumberBox.js';
-//import HomeEmissions from './HomeEmissions.js';
+import Question from './Question.js';
+
+import HomeEmissions from './HomeEmissions.js';
 
 
 class Calculator extends Component {
@@ -43,7 +44,7 @@ class Calculator extends Component {
       </div>
     );
   }
-  
+
   _getReadout(){
     return <Readout
       currentTotal={this.state.totalEmissions}
@@ -84,35 +85,59 @@ class VehicleEmissions extends React.Component {
         super();
         
         this.state = {
-            questions: [],
+            vehicles: [],  // Question blocks
             vehicleNums: 0,
             vehicleMaint: '',
             vehicleEmmitters: []
         }
     }
     
-    componentWillMount() {
-        this._setQuestions();
-    }
-    
     render(){
-        const theQuestions = this._getQuestions();
+        const theVehicles = this._getVehicles();
         
         return(
-            <div className="col-sm-6">
-                {theQuestions}
+            <div className="col-sm-6  emitter">
+                {this._getHowManyQuestion()}
+                {theVehicles}
             </div>
         );
     }
-  
-    _setQuestions(){
-        const tempQues = [
-            {id: 1, name: 'vehicleNum', question: 'How many vehicles does your household have?', icon: '', input: 'number', options: 'none', output: 'none'},
-            {id: 2, name: 'vehicleMaint', question: 'Perform regular maintenance on your vehicle(s)', icon: '', input: 'none', options: ['Do Not Do', 'Already Done'], output: 'none'},
-            {id: 3, name: 'vehicleMiles', question: 'On average, miles you drive:', icon: '', input: 'number', options: ['Per Year', 'Per Week'], output: 'none'},
-            {id: 4, name: 'vehicleMPG', question: 'Average gas mileage', icon: '', input: 'number', options: 'none', output: 'lbs of CO2'}];
+    
+    _getHowManyQuestion(){
+        //const qtyQues = [{id: 1, name: 'vehicleNum', question: 'How many vehicles does your household have?', icon: '', input: 'number', options: 'none', output: 'none'}];
         
-        this.setState({ questions: tempQues });
+        return <Question
+                id={1}
+                name={'vehicleNum'}
+                question={'How many vehicles does your household have?'}
+                input={'number'}
+                options={'none'}
+                onUpdate={this._addVehicles.bind(this)}
+                output={'none'}/>
+    }
+  
+    _addVehicles(name, inputVal){
+        if (this.state.vehicleNums < inputVal){
+            const vehicle = {
+                id: this.state.vehicles.length + 1
+            };
+            
+            this.setState({
+                vehicles: this.state.vehicles.concat([vehicle])
+            });
+
+        } else {
+            while (this.state.vehicles.length > inputVal){
+                this.state.vehicles.slice(0, this.state.vehicles.length-1);
+            }
+        }
+    }
+  
+    _getVehicles() {
+        return this.state.vehicles.map((vehicle) => {
+            return <Vehicle
+                id={vehicle.id} />
+        });
     }
   
     _getQuestions(){
@@ -156,88 +181,87 @@ class VehicleEmissions extends React.Component {
             })
         }
     }
+    
+    _setTotalVehicleEmissions(name, val){
+        let theTotal = this.state.vehicleEmmitters.reduce(function(accum, val){
+            return accum + val;
+        },0);
+        
+        this.props.setTotalEmissions('trans', theTotal);
+    }
 }
 
-class Question extends React.Component {
-    constructor(props) {
-        super(props);
-        
-        this.state = {
-            inputValue: 0,
-            selectOption: ''
-        };
-        this._handleInputNumber.bind(this);
-    }
+class Vehicle extends React.Component {
+    constructor() {
+    super();
+    
+    this.state = {
+        vehicleMiles: 0,
+        vehicleMilesSelect: '',
+        vehicleMPG: 0,
+        vehicleEmissions: 0
+    };
+  }
   
     render(){
-        return (
-            <div className="form-horizontal">
-                <div className="form-group">
-                    <label htmlFor="primaryHeat" className="col-sm-3 control-label">{this.props.question}</label>
-                    <div className="col-sm-3">
-                        {this._getInputNumberBox(this.props.id, this.props.input)}
-                        {this._getSelectBox(this.props.id, this.props.options)}
-                    </div>
-                    <div className="col-sm-3">
-                        <p className="output">{this.props.output}</p>
-                    </div>
-                </div>
+        //const theQuestions = this._getQuestions();
+        
+        return(
+            <div className="col-sm-6  emitter">
+                {this._getMilesQuestion()}
+                {this._getMPGQuestion()}
+                {this.state.vehicleEmissions} lbs of CO2
             </div>
         );
     }
-   
-    _getSelectBox(id, options){
-        if (this.props.options != 'none'){
-            return <SelectBox
-                id={id}
-                onUpdate={this._handleSelect.bind(this)}
-                options={options} />
+    
+    _getMilesQuestion() {
+        return <Question
+            id={this.props.id + 0}
+            name={'vehicleMiles' + this.props.id}
+            question={'On average, miles you drive:'}
+            input={'number'}
+            options={['Per Year', 'Per Week']}
+            onUpdate={this._setVehicleEmission.bind(this)}
+            output={'none'}/>
+    }
+    
+    _getMPGQuestion() {
+        return <Question
+            id={this.props.id + 1}
+            name={'vehicleMPG' + this.props.id}
+            question={'Average gas mileage:'}
+            input={'number'}
+            options={'none'}
+            onUpdate={this._setVehicleEmission.bind(this)}
+            output={'none'}/>
+    }
+    
+    _setVehicleEmission(name, inputVal, selectOpt){
+        if (this.state.vehicleMiles !== 0 && this.state.vehicleMilesSelect !== '' && this.state.vehicleMPG !== 0){
+            let theTotal = calcVehicleEmissions(this.state.vehicleMiles, this.state.vehicleMilesSelect, this.state.vehicleMPG);
+            this.props.setTotalVehicleEmissions(this.props.id, theTotal)
         }
     }
-  
-    _getInputNumberBox(id, inputValue){
-        if (this.props.input === 'number'){
-            return <InputNumberBox
-                id={id}
-                value={this.state.inputValue}
-                onUpdate={this._handleInputNumber.bind(this)} />
-        } else {
-            return;
+    
+    _handleInputValues(name, inputVal, selectOpt){
+        if (name === 'vehicleMiles'){
+            this.setState({
+                vehicleMiles: inputVal,
+                vehicleMilesSelect: selectOpt
+            });
+        }
+        else if (name === 'vehicleMPG'){
+            this.setState({
+                vehicleMPG: inputVal
+            });
         }
     }
-  
-    _handleInputNumber(val){    
-        this.setState({
-            inputValue: val
-        }, function(){
-            this._setUpdate();
-        });
-    }
-  
-    _handleSelect(val) {
-        this.setState({
-            selectOption: val
-        }, function(){
-            this._setUpdate();
-        });
-    }
-  
-    _setUpdate(){
-        if (this.props.input != 'number'){
-            this.props.onUpdate(this.props.name, this.state.inputValue, this.state.selectOption);
-        } else if (this.props.options === 'none'){
-            this.props.onUpdate(this.props.name, this.state.inputValue, this.state.selectOption);
-        }else {
-            //  _updateQuestion in <HomeEmissions>
-            if (this.state.inputValue != 0 && this.state.selectOption != ''){
-                this.props.onUpdate(this.props.name, this.state.inputValue, this.state.selectOption);
-            }
-        }
-    }
+
+
+    
 }
-
-
-
+/*
 class HomeEmissions extends React.Component {
   constructor() {
     super();
@@ -262,7 +286,7 @@ class HomeEmissions extends React.Component {
     const theQuestions = this._getQuestions();
     
     return(
-      <div className="col-sm-6">
+      <div className="col-sm-6 emitter">
         {theQuestions}
       </div>
     );
@@ -349,7 +373,7 @@ class HomeEmissions extends React.Component {
         this.props.setTotalEmissions('home', theTotal);
     }
 }
-
+*/
 export default Calculator;
 
 
