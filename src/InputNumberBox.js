@@ -4,6 +4,8 @@ class InputNumberBox extends Component {
   render(){
     return (
       <input
+        pattern='[0-9]*'
+        min={0}
         type='number'
         className='form-control'
         id={this.props.name}
