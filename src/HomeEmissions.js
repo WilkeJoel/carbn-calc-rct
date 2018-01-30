@@ -4,6 +4,8 @@ import calcFuelOil from './functions/calcFuelOil.js';
 import calcElectric from './functions/calcElectric.js';
 import calcPropane from './functions/calcPropane.js';
 
+import Question from './Question.js';
+
 
 class HomeEmissions extends React.Component {
   constructor() {
@@ -29,7 +31,7 @@ class HomeEmissions extends React.Component {
     const theQuestions = this._getQuestions();
     
     return(
-      <div className="col-sm-6">
+      <div className="col-sm-6 emitter">
         {theQuestions}
       </div>
     );
@@ -116,3 +118,5 @@ class HomeEmissions extends React.Component {
         this.props.setTotalEmissions('home', theTotal);
     }
 }
+
+export default HomeEmissions;
