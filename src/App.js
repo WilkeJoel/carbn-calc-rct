@@ -10,7 +10,6 @@ import calcVehicleEmissions from './functions/calcVehicleEmissions.js';
 
 import Readout from './Readout.js';
 import Question from './Question.js';
-
 import HomeEmissions from './HomeEmissions.js';
 
 
@@ -30,65 +29,64 @@ class Calculator extends Component {
     };
   }
     
-  render(){
-    const theReadout = this._getReadout();
-    
-    return(
-      <div className="row">
-        <HomeEmissions setTotalEmissions={this._setTotalEmissions.bind(this)}/>
-        <VehicleEmissions setTotalEmissions={this._setTotalEmissions.bind(this)}/>
+    render(){
+        const theReadout = this._getReadout();
         
-        <div className="col-sm-6">
-          {theReadout}
-        </div>
-      </div>
-    );
-  }
+        return(
+            <div className="row">
+                <HomeEmissions setTotalEmissions={this._setTotalEmissions.bind(this)}/>
+                <VehicleEmissions setTotalEmissions={this._setTotalEmissions.bind(this)}/>
+                
+                <div className="col-sm-6">
+                    {theReadout}
+                </div>
+            </div>
+        );
+    }
 
-  _getReadout(){
-    return <Readout
-      currentTotal={this.state.totalEmissions}
-      plannedTotal={this.state.revisedTotalEmissions}
-      usTotal={this.state.usAvgEmissions} />;
-  }
+    _getReadout(){
+        return <Readout
+            currentTotal={this.state.totalEmissions}
+            plannedTotal={this.state.revisedTotalEmissions}
+            usTotal={this.state.usAvgEmissions} />;
+    }
   
-  _setTotalEmissions(which, inputVal){  //  name, inputNum, selectOpt
-    let theEmmitters = Object.assign({}, this.state.theEmmitters);
-
-    if (which === 'home' ){
-      theEmmitters.homeEmissions = inputVal;
-    }
-    else if (which === 'trans'){
-      theEmmitters.transEmissions = inputVal;
-    }
-    else if (which === 'waste'){
-      theEmmitters.wasteEmissions = inputVal;
-    }
+    _setTotalEmissions(which, inputVal){  //  name, inputNum, selectOpt
+        let theEmmitters = Object.assign({}, this.state.theEmmitters);
     
-    this.setState( {theEmmitters}, function(){
-        this._getTotalEmissions();
-    });
-  }
+        if (which === 'home' ){
+            theEmmitters.homeEmissions = inputVal;
+        }
+        else if (which === 'trans'){
+            theEmmitters.transEmissions = inputVal;
+        }
+        else if (which === 'waste'){
+            theEmmitters.wasteEmissions = inputVal;
+        }
+        
+        this.setState( {theEmmitters}, function(){
+            this._getTotalEmissions();
+        });
+    }
   
-  _getTotalEmissions(){
-    this.setState({
-      totalEmissions: Object.values(this.state.theEmmitters)
-          .reduce(function(accum, val){
-            return accum + val;
-          },0)
-    });
-  }
+    _getTotalEmissions(){
+        this.setState({
+            totalEmissions: Object.values(this.state.theEmmitters)
+                .reduce(function(accum, val){
+                    return accum + val;
+                },0)
+        });
+    }
 }
 
 class VehicleEmissions extends React.Component {
     constructor() {
         super();
-        
         this.state = {
+            vehicleNum: 0,
             vehicles: [],  // Question blocks
-            vehicleNums: 0,
-            vehicleMaint: '',
-            vehicleEmmitters: []
+            vehicleMaint: 'Choose One',
+            vehicleEmmitters: []  //  the values
         }
     }
     
@@ -98,96 +96,103 @@ class VehicleEmissions extends React.Component {
         return(
             <div className="col-sm-6  emitter">
                 {this._getHowManyQuestion()}
+                {this._getMaintainQuestion()}
                 {theVehicles}
             </div>
         );
     }
     
-    _getHowManyQuestion(){
-        //const qtyQues = [{id: 1, name: 'vehicleNum', question: 'How many vehicles does your household have?', icon: '', input: 'number', options: 'none', output: 'none'}];
+    _updateVehicleNum(){
+        if (this.state.vehicles.length < this.state.vehicleNum){
+            this._addVehicle();
+        }
+        else if (this.state.vehicles.length > this.state.vehicleNum){
+            this._deleteVehicle();
+        }
+    }
+    
+    _deleteVehicle(){
+        const vehicles = this.state.vehicles.slice(0, this.state.vehicleNum);
+        const vehicleEmmitters = this.state.vehicleEmmitters.slice(0, this.state.vehicleNum);
         
+        this.setState({
+            vehicles,
+            vehicleEmmitters
+            }, function(){
+            this._updateVehicleNum();
+        });
+    }
+    
+    _addVehicle(){
+        const vehicle = {
+            id: this.state.vehicles.length
+        };
+        
+        this.setState({
+            vehicles: this.state.vehicles.concat([vehicle])
+        }, function(){
+            this._updateVehicleNum();
+        });
+    }
+
+    _getVehicles(){
+        if (this.state.vehicleMaint !== 'Choose One'){
+            return this.state.vehicles.map((vehicle) => {
+                return <Vehicle
+                    id={vehicle.id}
+                    onUpdate={this._setVehicleEmissions.bind(this)} />
+            });
+        }
+    }
+    
+    _setVehicleEmissions(id, inputVal){        
+        const vehicleEmmitters = this.state.vehicleEmmitters.slice();
+        vehicleEmmitters[id] = inputVal;
+        
+        this.setState({ vehicleEmmitters }, function(){
+            //this._setUpdate();
+        });
+    }
+    
+    _setVehicleNum(name, inputVal){
+        //  From GetHowMany Question
+        this.setState({ vehicleNum: inputVal },
+            function(){
+                this._updateVehicleNum();
+            });
+    }
+    
+    _getHowManyQuestion(){        
         return <Question
-                id={1}
+                id={0}
                 name={'vehicleNum'}
                 question={'How many vehicles does your household have?'}
                 input={'number'}
                 options={'none'}
-                onUpdate={this._addVehicles.bind(this)}
+                onUpdate={this._setVehicleNum.bind(this)}
                 output={'none'}/>
     }
-  
-    _addVehicles(name, inputVal){
-        if (this.state.vehicleNums < inputVal){
-            const vehicle = {
-                id: this.state.vehicles.length + 1
-            };
-            
-            this.setState({
-                vehicles: this.state.vehicles.concat([vehicle])
-            });
-
-        } else {
-            while (this.state.vehicles.length > inputVal){
-                this.state.vehicles.slice(0, this.state.vehicles.length-1);
-            }
-        }
-    }
-  
-    _getVehicles() {
-        return this.state.vehicles.map((vehicle) => {
-            return <Vehicle
-                id={vehicle.id} />
-        });
-    }
-  
-    _getQuestions(){
-        return this.state.questions.map((question) => {
+    
+    _getMaintainQuestion(){
+        //  question: 'Perform regular maintenance on your vehicle(s)', icon: '', input: 'none', options: ['Do Not Do', 'Already Done'], output: 'none'},
+        if (this.state.vehicles.length > 0){
             return <Question
-                id={question.id}
-                name={question.name}
-                question={question.question}
-                input={question.input}
-                options={question.options}
-                onUpdate={this._setVehicleEmissions.bind(this)}
-                output={question.output}/>
+                id={1}
+                name={'vehicleMaint'}
+                question={'Perform regular maintenance on your vehicle(s)'}
+                input={'none'}
+                options={['Choose One', 'Do Not Do', 'Already Done']}
+                onUpdate={this._setMaintenance.bind(this)}
+                output={'none'}/>
+        }
+    }
+    
+    _setMaintenance(name, inputVal, selectOpt){
+        const vehicleMaint = selectOpt;
+        
+        this.setState({ vehicleMaint }, function(){
+            this._getVehicles();
         });
-    }
-
-    _updateQuestion(name){  //  inputValue, selectOption
-
-        // find question in array with name =
-        function getProperty(obj){
-            return obj.name === name;
-        }
-    
-        var myObj = this.state.questions.find(getProperty);
-        //myObj.output = this.state.homeEmitters[name];
-        
-        const questions = this.state.questions;
-        
-        this.setState({questions});
-    }
-    
-    _setVehicleEmissions(name, inputVal, selectOpt){
-        alert("SetVehicles: " + name + ' :: ' + inputVal + ' :: ' + selectOpt);
-        
-        if (name === 'vehicleNum'){
-            this.setState({
-                vehicleNums: inputVal
-            })
-        } else if (name === 'vehicleMaint'){
-            this.setState({
-                vehicleMaint: selectOpt
-            })
-        }
-    }
-    
-    _setTotalVehicleEmissions(name, val){
-        let theTotal = this.state.vehicleEmmitters.reduce(function(accum, val){
-            return accum + val;
-        },0);
-        
-        this.props.setTotalEmissions('trans', theTotal);
     }
 }
 
@@ -199,30 +204,28 @@ class Vehicle extends React.Component {
         vehicleMiles: 0,
         vehicleMilesSelect: '',
         vehicleMPG: 0,
-        vehicleEmissions: 0
+        vehicleEmission: 0
     };
   }
   
     render(){
-        //const theQuestions = this._getQuestions();
-        
         return(
             <div className="col-sm-6  emitter">
                 {this._getMilesQuestion()}
                 {this._getMPGQuestion()}
-                {this.state.vehicleEmissions} lbs of CO2
+                {this.state.vehicleEmission} lbs of CO2
             </div>
         );
     }
     
     _getMilesQuestion() {
         return <Question
-            id={this.props.id + 0}
+            id={this.props.id}
             name={'vehicleMiles' + this.props.id}
             question={'On average, miles you drive:'}
             input={'number'}
             options={['Per Year', 'Per Week']}
-            onUpdate={this._setVehicleEmission.bind(this)}
+            onUpdate={this._handleInputValues.bind(this)}
             output={'none'}/>
     }
     
@@ -233,147 +236,47 @@ class Vehicle extends React.Component {
             question={'Average gas mileage:'}
             input={'number'}
             options={'none'}
-            onUpdate={this._setVehicleEmission.bind(this)}
+            onUpdate={this._handleInputValues.bind(this)}
             output={'none'}/>
     }
     
-    _setVehicleEmission(name, inputVal, selectOpt){
+    _setVehicleEmission(){
         if (this.state.vehicleMiles !== 0 && this.state.vehicleMilesSelect !== '' && this.state.vehicleMPG !== 0){
-            let theTotal = calcVehicleEmissions(this.state.vehicleMiles, this.state.vehicleMilesSelect, this.state.vehicleMPG);
-            this.props.setTotalVehicleEmissions(this.props.id, theTotal)
+            let vehicleEmission = 0;
+            vehicleEmission = calcVehicleEmissions(this.state.vehicleMiles, this.state.vehicleMilesSelect, this.state.vehicleMPG);
+            
+            this.setState({ vehicleEmission }, function(){
+                this._setUpdate();
+            });
         }
     }
     
-    _handleInputValues(name, inputVal, selectOpt){
+    _setUpdate(){
+        this.props.onUpdate(this.props.id, this.state.vehicleEmission);
+    }
+    
+    _handleInputValues(id, inputVal, selectOpt){
+        const name = id.slice(0, -1);
+        
         if (name === 'vehicleMiles'){
             this.setState({
                 vehicleMiles: inputVal,
                 vehicleMilesSelect: selectOpt
+            }, function(){
+                this._setVehicleEmission();
             });
         }
         else if (name === 'vehicleMPG'){
             this.setState({
                 vehicleMPG: inputVal
+            }, function(){
+                this._setVehicleEmission();
             });
         }
     }
-
-
     
 }
-/*
-class HomeEmissions extends React.Component {
-  constructor() {
-    super();
-    
-    this.state = {
-      questions: [],
-      primaryHeat: '',
-      homeEmitters: {
-        natGas: 0,
-        elec: 0,
-        fuelOil: 0,
-        propane: 0,
-       }
-    };
-  }
-    
-  componentWillMount() {
-    this._setQuestions();
-  }
-  
-  render(){
-    const theQuestions = this._getQuestions();
-    
-    return(
-      <div className="col-sm-6 emitter">
-        {theQuestions}
-      </div>
-    );
-  }
-  
-  _getQuestions(){
-    return this.state.questions.map((question) => {
-      return <Question
-                id={question.id}
-                name={question.name}
-                question={question.question}
-                input={question.input}
-                options={question.options}
-                onUpdate={this._setHomeEmissions.bind(this)}
-                output={question.output}/>
-    });
-  }
-    
-  _setQuestions(){
-    const tempQues = [
-      {id: 1, name: 'primaryHeat', question: 'What is your household\'s primary heating source?', icon: '', input: 'none', options: ['Select Option:', 'Natural Gas', 'Fuel Oil', 'Electricity', 'Proprane'], output: 'q1'},
-      {id: 2, name: 'natGas', question: 'Enter your average Natural Gas monthly bill or usage:', icon: '', input: 'number', options: ['Dollars', 'Thousand Cubic Feet', 'Therms'], output: 'q2'},
-      {id: 3, name: 'elec', question: 'Enter your average Electricity monthly bill or usage:', icon: '', input: 'number',options: ['Dollars', 'kWh'], output: 'q3'},
-      {id: 4, name: 'fuelOil', question: 'Enter your average Fuel Oil monthly bill or usage:', icon: '', input: 'number',options: ['Dollars', 'Gallons'], output: 'q4'},
-      {id: 5, name: 'propane', question: 'Enter your average Propane monthly bill or usage:', icon: '', input: 'number',options: ['Dollars', 'Gallons'], output: 'q5'}];
-    
-    this.setState({ questions: tempQues });
-  }
-  
-  _updateQuestion(name){  //  inputValue, selectOption
 
-    // find question in array with name =
-    function getProperty(obj){
-      return obj.name === name;
-    }
-    
-    var myObj = this.state.questions.find(getProperty);
-    myObj.output = this.state.homeEmitters[name];
-    
-    const questions = this.state.questions;
-    
-    this.setState({questions});
-  }
-  
-    _setHomeEmissions(name, inputVal, selectOpt){  //  name, inputNum, selectOpt
-        
-        alert("name: " + name);
-        
-        if (name === 'primaryHeat'){
-            this.setState({
-                primaryHeat: selectOpt
-            });
-        } else if (this.state.primaryHeat != ''){
-            let homeEmitters = Object.assign({}, this.state.homeEmitters);
-            
-            if (name === 'natGas' ){
-                homeEmitters.natGas = calcNaturalGas(inputVal, selectOpt);
-            }
-            else if (name === 'elec'){
-                homeEmitters.elec = calcElectric(inputVal, selectOpt);
-            }
-            else if (name ==='fuelOil' ){
-                homeEmitters.fuelOil = calcFuelOil(inputVal, selectOpt);
-            }
-            else if (name ==='propane' ){
-                homeEmitters.propane = calcPropane(inputVal, selectOpt);
-            }
-        
-            this.setState({homeEmitters}, function(){
-                this._updateQuestion(name);
-                this._setTotalHomeEmmitters();
-            });
-        } else {
-            alert("Select Primary Heat Source First");
-        }
-    }
-    
-    _setTotalHomeEmmitters(){        
-        let theTotal =  Object.values(this.state.homeEmitters)
-                .reduce(function(accum, val){
-                  return accum + val;
-                },0);
-        
-        this.props.setTotalEmissions('home', theTotal);
-    }
-}
-*/
 export default Calculator;
 
 
