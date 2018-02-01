@@ -1,5 +1,5 @@
 export const g_eFactorValue = 1;
-
+export const g_MAINTENANCE_NOT_DO_FACTOR = 1.04;
 
 
 // Household Vehicles
