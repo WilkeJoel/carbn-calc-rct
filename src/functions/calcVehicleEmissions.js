@@ -4,9 +4,7 @@ import { calcMilesPerYear } from '../utils.js';
 import { g_MAINTENANCE_NOT_DO_FACTOR } from '../Constants.js';
 
 export default function calcVehicleEmissions(miles, select, mpg, maintSelect){
-	//var miles = scrubInputText(mileChecker);               //  check for non number related characters
-	//miles = stripCommas(miles);
-	
+
 	if (select === "Per Week") {                           // convert miles per week to miles per year first
 		miles = calcMilesPerYear(miles);
 	}
@@ -16,6 +14,6 @@ export default function calcVehicleEmissions(miles, select, mpg, maintSelect){
 	if (maintSelect === "Do Not Do") {
 		exhaust = exhaust * g_MAINTENANCE_NOT_DO_FACTOR;
 	}
-	
+
 	return exhaust;
 }

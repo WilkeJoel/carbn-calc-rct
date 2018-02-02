@@ -4,16 +4,28 @@ import Question from './Question.js';
 
 
 class Vehicle extends React.Component {
-    constructor() {
-    super();
+    constructor(props) {
+    super(props);
     
     this.state = {
+        maintenance: this.props.maintenance,
         vehicleMiles: 0,
         vehicleMilesSelect: '',
         vehicleMPG: 0,
         vehicleEmission: 0
     };
   }
+  
+    componentWillReceiveProps(nextProps) {
+        if(this.props.maintenance !== nextProps.maintenance){
+            //this._alertMethod(nextProps);
+            this.setState({
+                maintenance: nextProps.maintenance
+            }, function(){
+                this._setVehicleEmission();
+            });
+        }
+    }
   
     render(){
         return(
@@ -50,7 +62,7 @@ class Vehicle extends React.Component {
     _setVehicleEmission(){
         if (this.state.vehicleMiles !== 0 && this.state.vehicleMilesSelect !== '' && this.state.vehicleMPG !== 0){
             let vehicleEmission = 0;
-            vehicleEmission = calcVehicleEmissions(this.state.vehicleMiles, this.state.vehicleMilesSelect, this.state.vehicleMPG);
+            vehicleEmission = calcVehicleEmissions(this.state.vehicleMiles, this.state.vehicleMilesSelect, this.state.vehicleMPG, this.props.maintenance);
             
             this.setState({ vehicleEmission }, function(){
                 this._setUpdate();
@@ -60,6 +72,10 @@ class Vehicle extends React.Component {
     
     _setUpdate(){
         this.props.onUpdate(this.props.id, this.state.vehicleEmission);
+    }
+    
+    _alertMethod(input){
+        alert('Alert Method: ' + JSON.stringify(input));
     }
     
     _handleInputValues(id, inputVal, selectOpt){
