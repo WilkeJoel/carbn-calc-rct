@@ -154,7 +154,7 @@ class VehicleEmissions extends React.Component {
         vehicleEmmitters[id] = inputVal;
         
         this.setState({ vehicleEmmitters }, function(){
-            //this._setUpdate();
+            this._setUpdate();
         });
     }
     
