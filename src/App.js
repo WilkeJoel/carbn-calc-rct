@@ -127,6 +127,7 @@ class VehicleEmissions extends React.Component {
     _addVehicle(){
         const vehicle = {
             id: this.state.vehicles.length
+            //maintenance: this.state.vehicleMaint
         };
         
         this.setState({
@@ -138,9 +139,11 @@ class VehicleEmissions extends React.Component {
 
     _getVehicles(){
         if (this.state.vehicleMaint !== 'Choose One'){
+              //alert("HERE: " + JSON.stringify(this.state.vehicles));
             return this.state.vehicles.map((vehicle) => {
                 return <Vehicle
                     id={vehicle.id}
+                    maintenance ={this.state.vehicleMaint}
                     onUpdate={this._setVehicleEmissions.bind(this)} />
             });
         }
@@ -191,9 +194,27 @@ class VehicleEmissions extends React.Component {
     _setMaintenance(name, inputVal, selectOpt){
         const vehicleMaint = selectOpt;
         
-        this.setState({ vehicleMaint }, function(){
+        let vehicles = [...this.state.vehicles];
+
+      vehicles = this.state.vehicles.map((vehicle) => {
+            vehicle.maintenance = selectOpt;
+            return vehicle;
+        });
+      
+        this.setState({
+            vehicleMaint,
+            vehicles
+            }, function(){
             this._getVehicles();
         });
+    }
+    
+    _setUpdate(){
+        let theTotal = this.state.vehicleEmmitters.reduce(function(accum, val){
+            return accum + val;
+        },0);
+        
+        this.props.setTotalEmissions('trans', theTotal);
     }
 }
 
